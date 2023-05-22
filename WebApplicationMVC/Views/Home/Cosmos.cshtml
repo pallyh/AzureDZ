@@ -1,0 +1,38 @@
+﻿@using WebApplicationMVC.Models
+@{
+    ViewData["Title"] = "Cosmos Page";
+    var feedbacks = ViewData["Feedbacks"] as List<Feedback> ?? new();
+    var users = ViewData["Users"] as List<UserModel> ?? new();
+}
+<h1>Работа с Azure Cosmos DB</h1>
+<p>
+    1. Создание учетной записи "webappscosmosdbdns" на портале Azure.
+    Также в ней создается первый контейнер "Items".
+    Скачиваем пример приложения для образца.
+</p>
+<p>
+    2. Приложение для работы с БД (подключение БД к нашему приложению).
+    2.1. NuGet  Microsoft.Azure.Cosmos
+</p>
+<p>Найдено @(feedbacks.Count) сообщений:</p>
+@foreach(var feedback in feedbacks) {
+    <p>@feedback.Author?.Name  @feedback.Text</p>
+}
+
+<p>Найдено @(users.Count) пользователей:</p>
+@foreach (var user in users)
+{
+    <p>@user.Id @user.Name</p>
+}
+
+<form action="/Home/Cosmos" method="post">
+    Author: <input name="Author" required /><br />
+    Password: <input name="Password" type="password" required /><br />
+    Comment: <input name="Text" required /><br />
+    Vote:
+    <input name="Vote" value="1" type="radio" id="vote1" />
+    <label for="vote1">Database</label>
+    <input name="Vote" value="2" type="radio" id="vote2" />
+    <label for="vote2">File</label><br />
+    <input type="submit" value="Feedback" />
+</form>

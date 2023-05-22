@@ -1,0 +1,47 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+    var Feedbacks = ViewData["Feedbacks"] as List<Feedback>;
+}
+
+<div class="text-center">
+    <h1 class="display-4">Вітаємо на моєму сайті</h1>
+    <p>
+        @ViewData["Message"]
+    </p>    
+    <form action="/Home/Index" method="post">
+        Author: <input name="Author" required /><br />
+        Comment: <input name="Text" required /><br />
+        Vote: 
+        <input name="Vote" value="1" type="radio" id="vote1"/>
+        <label for="vote1">Database</label>
+        <input name="Vote" value="2" type="radio" id="vote2" />
+        <label for="vote2">File</label><br />
+        <input type="submit" value="Feedback" />
+    </form>
+    <br />
+    <table class="feedback-table" border="1" cellspacing="0" cellpadding="7">
+        <thead>
+            <tr>
+                <th>За бази даних</th>
+                <th>За файли</th>
+                <th>Слабо визначитись</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="height:33vh"></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+    Д.З. Организовать отображение отзывов в трех группах, стилизовать вывод
+    приложить ссылку на сайт (azurewebsites.net)
+
+    @if (Feedbacks != null)
+        @foreach (Feedback feedback in Feedbacks)
+        {
+            <p>@feedback.Vote @feedback.Moment <br/>
+                @feedback.AuthorId :  @feedback.Text</p>
+        }
+</div>

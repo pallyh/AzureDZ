@@ -1,0 +1,131 @@
+﻿@using WebApplicationMVC.Controllers
+@{
+    ViewData["Title"] = "Translate Page";
+}
+<form>
+    From Language: <select name="lang">
+        @if (ViewData["SupportedLanguages"] is String[] langsFrom) {
+            foreach (String lang in langsFrom)
+            {
+                <option>@lang</option>
+            }
+        }
+    </select>
+    <script>document.querySelector("select[name=lang]").selectedIndex = 0</script>
+    
+    To Language: <select name="langTo">
+        @if (ViewData["SupportedLanguages"] is String[] langsTo)
+        {
+            foreach (String lang in langsTo)
+            {
+                <option>@lang</option>
+            }
+        }
+    </select>
+    <script>document.querySelector("select[name=langTo]").selectedIndex = 1</script>
+
+    <input type="submit" value="Translate"/>
+</form>
+
+@ViewData["Error"]
+
+@if(ViewData["origin"] is Translation origin){
+    <p>
+        Original: <b>@origin.text</b> (@origin.to)
+    </p>
+}
+@if(ViewData["TranslateResult"] is TranslateResult[] TranslateResults) {
+if (TranslateResults.Length > 0 && TranslateResults[0].translations is not null) 
+{
+    <table class="table table-striped">
+    <thead><tr><th>Lang</th><th>Text</th></tr></thead>
+    <tbody>
+    @foreach (var translation in TranslateResults[0].translations)
+    {
+        <tr>
+            <td>@translation.to </td>
+            <td>@translation.text</td>
+        </tr>
+    }
+    </tbody>
+    </table>
+}}
+
+<label>
+    <input type="checkbox" id="autotrans" />
+    Автоперевод выделенного
+</label>
+Время показа перевода: 
+<input type="range" id="showTimeRange" /> 
+<span id="showTime">150</span> мс&middot;сим<sup>-1</sup>
+<p>
+    <b>EN</b> After school, Kamal took the girls to the old house. It was very old and very dirty too. There was rubbish everywhere. The windows were broken and the walls were damp. It was scary. Amy didn’t like it. There were paintings of zombies and skeletons on the walls. “We’re going to take photos for the school art competition,” said Kamal. Amy didn’t like it but she didn’t say anything. “Where’s Grant?” asked Tara. “Er, he’s buying more paint.” Kamal looked away quickly. Tara thought he looked suspicious. “It’s getting dark, can we go now?” said Amy. She didn’t like zombies.
+</p>
+<p>
+    <b>UK</b> Вочевидь, зараз не всі пригадають цю серпневу дату – вісімнадцяте святкування Дня Незалежності України. Відлік десятилітньої історії Вишиванкового фестивалю розпочався саме тоді, коли сімдесят дев’ять людей, убраних у виши́ванки, утворили вздовж Потьомкінських сходів так званий «живий ланцюг». Амбітні плани організаторів повністю виправдалися: він сягнув-таки берега моря. Простягаючись білою ниткою від п’єдесталу пам’ятника Рішельє, ланцюг із року в рік ставав усе довшим, а разом із цим зростало й усвідомлення Одеси як українського міста. Зростало настільки, що в 2014 році, незважаючи на невпинну зливу, для участі в акції «Вишиванковий ланцюг» вишикувалася півторатисячна черга, утворивши нескінченне живе море виши́ванок.
+</p>
+<p>
+    <b>DE</b> Caroline und Alexander sind sehr sportlich. Sie laufen fast jeden Tag zehn Kilometer, auch wenn es regnet. Manchmal gehen sie ins Fitness-Studio, jeden Freitag spielen sie Tennis. Im letzten Sommer sind sie oft mit dem Fahrrad zum Schwimmen an einen See gefahren. Im Winter können sie leider nicht schwimmen gehen, weil in der Nähe kein Hallenbad ist.
+</p>
+<p>
+    <b>JA</b> みんなの日本語 いいえ、ひこうきのチケットです。 来週ドイツへ行きます。
+</p>
+<p>
+    Д.З. Добавить в диалог перевода информацию:
+     об исходном языке
+     об исходном (переводимом) фрагменте
+     о конечном языке (перевода)
+     * использовать разные стили для исходного фрагмента и перевода
+
+     en: hello
+     uk: ВІТАННЯ
+</p>
+<dialog id="transDialog">Перевод</dialog>
+
+<script>
+    window.lastSelection = document.getSelection().toString();
+    showTimeRange.onchange = e => {
+        showTime.innerText = +e.target.value + 100;
+    };
+    document.addEventListener( "mouseup", e => {
+        const selection = document.getSelection().toString() ;
+        if( selection === ''
+         || selection === window.lastSelection ) return ;
+
+        window.lastSelection = selection;
+        if( document.getElementById("autotrans").checked ) {
+            console.log(selection);
+            translate( selection ) ;
+        }
+    });
+
+    function translate( fragment ) {
+        // получаем данные о языках (From / To)
+        const langFrom = document.querySelector("select[name=lang] option:checked").value;
+        const langTo = document.querySelector("select[name=langTo] option:checked").value;
+        //console.log(langFrom); console.log(langTo); return;
+        fetch(
+            "https://api.cognitive.microsofttranslator.com" +
+            `/translate?api-version=3.0&from=${langFrom}&to=${langTo}`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Ocp-Apim-Subscription-Key": "36daeffa9eb048bebc8f0117bb83e500",
+                "Ocp-Apim-Subscription-Region": "global"
+            },
+            body: JSON.stringify( [ { "Text": fragment } ] )
+        }).then( r => r.json() )
+        .then( j => {
+            // console.log(j);
+            transDialog.innerText = j[0].translations[0].text;
+            transDialog.showModal();
+            setTimeout( () => transDialog.close(),
+                500 + showTime.innerText * transDialog.innerText.length);
+        } ) ;
+    }
+
+    document.addEventListener('selectionchange', e=>{
+        // console.log(e.timeStamp, document.getSelection().toString());
+    })
+</script>

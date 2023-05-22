@@ -1,0 +1,18 @@
+﻿Сессии (НТТР-сессии)
+
+Cookie - часть НТТР стандарта, заголовки запроса и ответа,
+ главной особенностью которых является необходимость 
+ включения всех полученных из ответа Cookie во все последующие
+ запросы.
+
+Browser ---> request (GET/ Host:...) --->  Server
+       <--- response(200 Cookie: x=10) <---
+<link> ---> (GET/ Host:..., Cookie: x=10) --->
+////// time /////////////     
+\\\\\\ перезапуск \\\\\\\       v запомнено в браузере
+Browser ---> (GET/ Host:..., Cookie: x=10) --->
+
+Session                                  Server
+Browser (Cookie SessionId)               Sessions[SessionId]
+1 значение для Cookie                     массив (словарь)
+

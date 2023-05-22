@@ -1,0 +1,100 @@
+﻿@{
+    ViewData["Title"] = "Privacy Policy";
+}
+<h1>@ViewData["Title"]</h1>
+
+<p>Данные из сессии: @ViewData["fromSession"]</p>
+
+<h2>CORP</h2>
+<p>
+    Cross-Origin Resource Policy - Ограничения междоменного обмена.
+    По умолчанию обмен данными (ресурсами) между участниками
+    с разным расположением (Origin, Domain) ограничиваются.
+    Это означает, что фронтенд с адресом https://site.com 
+    будет ограничен
+    в обмене данными с бэкендом на адресах 
+    https://back.site.com
+    http://site.com
+    https://site.com:8080
+</p>
+<h2>CORS</h2>
+<p>
+    Cross-Origin Resource Sharing - реализация междоменного обмена
+    данными (ресурсами).<br/>
+    Согласно договоренности, междоменные запросы могут передаваться
+    только методами GET и POST, содержать только текстовое тело (запрещен 
+    заговок Content-Type, как и большинство других заголовков).
+    <br />
+    Разрешение на обращение с другого домена задается заголовком<br />
+    Access-Control-Allow-Origin<br />
+    Например, Access-Control-Allow-Origin: http://site.com<br />
+    Или Access-Control-Allow-Origin: *   -- для всех доменов.<br />
+    В ASP включается директивой .AllowAnyOrigin() либо 
+    .SetIsOriginAllowed( origin => true )
+    <br />
+    Запросы другими методами (не GET и POST) имеют особенности:<br />
+    - предварительно посылается запрос методом OPTIONS
+    по его рез-там проводится анализ CORS-заголовков на разрешение методов<br />
+    Access-Control-Request-Method: GET, POST, PUT, DELETE<br />
+    - если метод есть среди разрешенных (и разрешен домен), то
+    проводится основной запрос указанным методом.
+    <br />
+    Аналогичное поведение происходит при наличии в запросе неразрешенных
+    заголовков. Наиболее популярный из них -  Content-Type: application/json
+    <br />
+    В таком случае также посылается OPTIONS запрос и ожидается в ответе
+    <br />
+    Access-Control-Request-Headers: Content-Type
+</p>
+<hr/>
+<p>
+    "ручное" управление заголовками ответа может быть нивелировано
+    настройками сервера. В нашем случае поведение сайта в локальном
+    запуске и в удаленном (на Azure) отличаются наборами заголовком.
+
+</p>
+Д.З. Добавить кнопки с методами Put и Patch
+Реализовать для них обработчики нажатия, а также серверные методы
+(в контроллере) для них. Приложить ссылку на репозиторий
+
+<input type="button" value="Get JSON" onclick="getJson()"/>
+<input type="button" value="Post JSON" onclick="postJson()"/>
+<input type="button" value="Delete JSON" onclick="delJson()"/>
+<input type="button" value="Patch JSON" onclick="patchJson()"/>
+
+<p id="out"></p>
+
+<script>
+    function getJson() {
+        fetch("https://mvc20221007dns.azurewebsites.net/api/feedback")
+        .then( r => r.text() )
+        .then( t => out.innerText = t ) ;
+    }
+    function postJson() {
+        // const url = "/api/feedback";
+        const url = "https://mvc20221007dns.azurewebsites.net/api/feedback";
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ id: "278b1360-231d-4150-9aef-2aea9b5e6cb3" })
+        })
+        .then(r => r.text())
+        .then(t => out.innerText = t);
+    }
+    function delJson() {
+        fetch("https://mvc20221007dns.azurewebsites.net/api/feedback", {
+            method: "DELETE"
+        })
+        .then(r => r.text())
+        .then(t => out.innerText = t);
+    }
+    function patchJson() {
+        fetch("https://mvc20221007dns.azurewebsites.net/api/feedback", {
+            method: "PATCH"
+        })
+            .then(r => r.text())
+            .then(t => out.innerText = t);
+    }
+</script>

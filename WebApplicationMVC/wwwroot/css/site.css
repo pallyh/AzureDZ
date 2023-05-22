@@ -1,0 +1,36 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.search-res-switch {
+    list-style-type: none;
+}
+    .search-res-switch li {
+        background-color: lightgray;
+        cursor: pointer;
+        display: inline-block;
+        margin-right: 3em;
+        padding: 0 .75em;
+        text-decoration: none;
+    }
+        .search-res-switch li:hover {
+            background-color: pink;
+        }
+        .search-res-switch li:active {
+            text-decoration: underline;
+        }

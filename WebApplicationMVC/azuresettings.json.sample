@@ -1,0 +1,7 @@
+{
+  "BingSearch": {
+    "Endpoint": "https://api.bing.microsoft.com/",
+    "AllSearch": "v7.0/search",
+    "Key": "_CHANGE_ME_"
+  }
+}

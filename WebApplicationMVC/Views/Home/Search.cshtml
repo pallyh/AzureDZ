@@ -1,0 +1,156 @@
+﻿@using System.Text.RegularExpressions
+@{
+    ViewData["Title"] = "Cognitive search";
+    var searchResult =
+       ViewData["SearchResult"] as WebApplicationMVC.Controllers.SearchResult;
+}
+<h1>@ViewData["Title"]</h1>
+<h2>Query: <u>@(searchResult?.queryContext?.originalQuery)</u> </h2>
+<h3>Total: @(searchResult?.webPages?.totalEstimatedMatches) </h3>
+<nav>
+    <ul class="search-res-switch">
+        <li data-section="all-res">All</li>
+        <li data-section="img-res">Images</li>
+        <li data-section="vid-res">Videos</li>
+    </ul>
+</nav>
+<div id="res-container" style="display:flex;justify-content:space-around">
+    <section id="all-res" style="display:none;width:75vw">
+    @if (searchResult?.webPages?.value == null) {
+        <p>Found nothing</p>
+    } else { 
+        // int i = 1 ;
+        // foreach (var res in searchResult.webPages.value) {
+        for (int i = 0; i < 5; ++i)
+        {   var res = searchResult.webPages.value[i];
+        
+        <div>
+            <b>@(i+1)</b>
+            <a href="@res.url">@res.displayUrl</a><br/>
+            <u>@res.name</u><br />
+            <span>@res.snippet</span>
+            <hr />
+        </div>
+            }
+        }
+    </section>
+    <section id="img-res" style="display:none;width:75vw">
+        @if (searchResult?.images?.value == null)
+        {
+            <p>Found no image(s)</p>
+        }
+        else
+        {
+            for (int i = 0; i < 5; ++i)
+            {
+                var res = searchResult.images.value[i];
+                <div>
+                    <img src="@res.thumbnailUrl" alt="@res.name" style="max-width:150px;float:left;margin-right:1em;" />
+                    <b>@(i + 1)</b>
+                    <a href="@res.contentUrl">Открыть изображение</a><br />
+                    <a href="@res.hostPageUrl">Открыть сайт</a><br />
+                    <u>@res.name</u>
+                    <br style="clear:left" />                    
+                    <hr />
+                </div>
+            }
+        }
+    </section>
+    <section id="vid-res" style="display:block;width:75vw">
+        @if (searchResult?.videos?.value == null)
+        {
+            <p>Found no video(s)</p>
+        }
+        else
+        {
+            for (int i = 0; i < 5; ++i)
+            {
+                var res = searchResult.videos.value[i];
+                <div>
+                    <b>@(i + 1)</b>
+                    <u title="@res.description">@res.name</u>
+                    @Html.Raw(
+                        Regex.Replace(
+                            Regex.Replace(
+                            res.embedHtml.Replace("http","https"),
+                            "width=\"\\d+\"",
+                            "width=\"200\""),
+                        "height=\"\\d+\"",
+                        "height=\"150\"")
+                    )
+                                        
+                    <br style="clear:left" />
+                    <hr />
+                </div>
+            }
+        }
+    </section>
+</div>
+<p id="total"></p>
+Cognitive search: Реализовать возможность ввода строки для поиска
+Обратить внимание: перед подстановкой запроса его желательно кодировать URL
+
+<script>
+    window.searchResults =  @Html.Raw(ViewBag.JsonResult)
+</script>
+
+<script>
+    function resSwitchClick(e) {  // клик на переключателе типов результатов
+        const activeSectionId = e.target.getAttribute("data-section");
+        for (let sec of document.querySelectorAll("#res-container section")) {
+            if( sec.id == activeSectionId ) {
+                sec.style.display = "block";
+            }
+            else {
+                sec.style.display = "none";
+            }
+        }
+        // console.log(activeSectionId);
+    }
+    document.addEventListener("DOMContentLoaded", () => {
+        // search-res-switch - переключение результатов по типам
+        for (let li of document.querySelectorAll(".search-res-switch li")) {
+            li.addEventListener("click", resSwitchClick );
+        }
+        let cnt = window.searchResults.webPages.value.length;
+        const total = document.getElementById("total") ;
+        total.innerText = cnt;
+        let perPage = 5;
+        let pages = Math.ceil( cnt / perPage ) ;
+        for( let i = 1; i <= pages; ++i ) {
+            let btn = document.createElement("button");
+            btn.innerText = i;
+            btn.onclick = pageClick;
+            total.appendChild(btn);
+        }
+
+    });
+    function pageClick(e) {
+        const section = document.querySelector("section");
+        const p = section.querySelector("div");
+        
+        for( let pp of section.querySelectorAll("div") ) {
+            section.removeChild(pp);
+        }
+        let perPage = 5;   // 1-2-3-4   0-5-10-15
+        let page = Number(e.target.innerText);
+        for (let i = (page - 1) * perPage; i < page * perPage; ++i) {
+            const pclone = p.cloneNode(true);
+            const data = window.searchResults.webPages.value[i] ;
+            pclone.querySelector("b").innerText = i + 1;
+            pclone.querySelector("a").innerText = data.displayUrl;
+            pclone.querySelector("a").href = data.url;
+            pclone.querySelector("u").innerText = data.name;
+            pclone.querySelector("span").innerText = data.snippet;
+
+            section.appendChild(pclone);
+        }
+    }
+    /*
+        Д.З. Когнитивный поиск - тематика. Задание: реализовать
+        отображение результатов поиска видео, переключение
+        между вкладками "Все", "Изображения", "Видео"
+        * Добавить к странице поиска "Похожие запросы"
+        Приложить ссылку на сайт
+    */
+</script>
